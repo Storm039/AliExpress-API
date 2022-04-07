@@ -3,7 +3,7 @@ import requests
 import top.api
 import pandas as pd
 from multiprocessing import Pool
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 import time
 import csv
 import datetime
@@ -15,7 +15,7 @@ class Utils:
 
     @staticmethod
     def load_env():
-        return load_dotenv('.env')
+        return dotenv_values('.env')
 
 
 class AELogger:
@@ -27,11 +27,14 @@ class AELogger:
         print_log_message_to_console - Булево, определяет, нужно ли выводить сообщение в консоль отладчика.
     """
 
-    def __init__(self, config):
-        self.log_folder = config.get("LOG_FOLDER")
-        self.write_log_message_to_file = config.get("WRITE_LOG_MESSAGE_TO_FILE")
-        self.send_log_message_to_server = config.get("SEND_LOG_MESSAGE_TO_SERVER")
-        self.print_log_message_to_console = config.get("PRINT_LOG_MESSAGE_TO_CONSOLE")
+    def __init__(self, config_):
+        self.log_folder = config_.get("LOG_FOLDER")
+        self.write_log_message_to_file = config_.get("WRITE_LOG_MESSAGE_TO_FILE")
+        self.send_log_message_to_server = config_.get("SEND_LOG_MESSAGE_TO_SERVER")
+        self.print_log_message_to_console = config_.get("PRINT_LOG_MESSAGE_TO_CONSOLE")
+        self.auth_string = config_.get("AUTH_STRING")
+        self.telegram_id = config_.get("TELEGRAM_ID")
+        self.telegram_server = config_.get("TELEGRAM_SERVER")
 
     def process_log_message(self, message):
         """
@@ -78,12 +81,21 @@ class AELogger:
             writer.writerow({'Date': current_datetime, 'Log_message': message})
             csvFile.close()
 
-    @staticmethod
-    def send_message_to_server(message):
+    def send_message_to_server(self, message):
         """
         Процедура отправляет сообщение на удаленный сервер.
         """
-        x = 1
+        data = {
+                "recipients": [self.telegram_id],
+                "msg": [
+                    {"type": "header", "text": "Aliexpress"},
+                    {"type": "pre", "text": message}
+                ],
+                "auth": self.auth_string
+             }
+        response = requests.post(self.telegram_server,
+                                 json=data)
+        z = 0
 
 
 class AEGeneralProductUpdater:
@@ -498,10 +510,8 @@ class AEGeneralProductUpdater:
             - inventory
         """
 
-        # Записываем в лог два сообщения - одно начале операции обновления, другое по получению данных от 1С
-        # log_message = f"Начало операции обновления цен и остатков товаров на AliExpress.\n" \
-        #               f"{'---' * 20}"
-        # self.logger.process_log_message(log_message)
+        log_message = f"Начало операции обновления цен и остатков товаров на AliExpress."
+        self.logger.process_log_message(log_message)
 
         # log_message = f"Получение данных от 1С.\n" \
         #               f"{'---' * 20}"
@@ -867,12 +877,10 @@ class AEProductBatchUpdater:
             # self.logger.process_log_message(log_message)
             self.update_inventory(df)
 
-            # log_message = f"Окончание операции обновления цен и остатков товаров на AliExpress.\n" \
-            #               f"{'---' * 20}"
-            # self.logger.process_log_message(log_message)
+            log_message = f"---Операции обновления цен и остатков товаров на AliExpress завершены---"
+            self.logger.process_log_message(log_message)
         else:
-            log_message = f"Нет необходимых данных для обновления цен и остатков на AliExpress.\n" \
-                          f"{'---' * 20}"
+            log_message = f"Нет необходимых данных для обновления цен и остатков на AliExpress"
             self.logger.process_log_message(log_message)
 
 
