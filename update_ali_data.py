@@ -877,7 +877,7 @@ class AEProductBatchUpdater:
             # self.logger.process_log_message(log_message)
             self.update_inventory(df)
 
-            log_message = f"---Операции обновления цен и остатков товаров на AliExpress завершены---"
+            log_message = f"---Операции обновления цен и остатков на AliExpress завершены---"
             self.logger.process_log_message(log_message)
         else:
             log_message = f"Нет необходимых данных для обновления цен и остатков на AliExpress"
