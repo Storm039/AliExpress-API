@@ -29,9 +29,9 @@ class AELogger:
 
     def __init__(self, config_):
         self.log_folder = config_.get("LOG_FOLDER")
-        self.write_log_message_to_file = config_.get("WRITE_LOG_MESSAGE_TO_FILE")
-        self.send_log_message_to_server = config_.get("SEND_LOG_MESSAGE_TO_SERVER")
-        self.print_log_message_to_console = config_.get("PRINT_LOG_MESSAGE_TO_CONSOLE")
+        self.write_log_message_to_file = bool(int(config_.get("WRITE_LOG_MESSAGE_TO_FILE")))
+        self.send_log_message_to_server = bool(int(config_.get("SEND_LOG_MESSAGE_TO_SERVER")))
+        self.print_log_message_to_console = bool(int(config_.get("PRINT_LOG_MESSAGE_TO_CONSOLE")))
         self.auth_string = config_.get("AUTH_STRING")
         self.telegram_id = config_.get("TELEGRAM_ID")
         self.telegram_server = config_.get("TELEGRAM_SERVER")
@@ -891,17 +891,17 @@ if __name__ == '__main__':
     updater = AEProductBatchUpdater(config)
 
     # Рассчитываем количество страниц, записываем в свойство класса
-    # collector.get_num_page_count()
+    collector.get_num_page_count()
 
     # Получаем список идентификаторов AliExpress, записываем в свойство класса и сохраняем в csv-файл
-    # collector.get_list_ids_ali()
+    collector.get_list_ids_ali()
 
     # Читаем ранее созданный файл со списком Идентификаторв ALi со SKU
-    # collector.read_file_product_info()
+    collector.read_file_product_info()
 
     # Получаем по API списки SKU для сохраненных в файле идентификаторов AliExpress,
     # и записываем результирующий словарь со списком идентификаторов AliExpress и связанными SKU в файл
-    # collector.collecting_product_data()
+    collector.collecting_product_data()
 
-    collector.get_data_from_1c()
-    updater.update_resources(collector.data_from_1c)
+    # collector.get_data_from_1c()
+    # updater.update_resources(collector.data_from_1c)
